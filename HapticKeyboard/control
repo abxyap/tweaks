@@ -1,0 +1,9 @@
+Package: com.cameronkatri.haptickeyboard
+Name: HapticKeyboard
+Version: 0.0.1
+Architecture: iphoneos-arm
+Description: An awesome MobileSubstrate tweak!
+Maintainer: Cameron Katri <me@cameronkatri.com>
+Author: Cameron Katri <me@cameronkatri.com>
+Section: Tweaks
+Depends: mobilesubstrate (>= 0.9.5000)
