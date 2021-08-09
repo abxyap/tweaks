@@ -1,6 +1,6 @@
 Package: com.cameronkatri.batterypercent
 Name: BatteryPercent
-Version: 0.0.1
+Version: 0.0.2
 Architecture: iphoneos-arm
 Description: An awesome MobileSubstrate tweak!
 Maintainer: Cameron Katri <me@cameronkatri.com>
