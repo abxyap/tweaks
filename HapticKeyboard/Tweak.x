@@ -15,3 +15,5 @@
 }
 
 %end
+
+// vim: filetype=logos
