@@ -1,0 +1,9 @@
+Package: com.cameronkatri.quickactions
+Name: QuickActions
+Version: 1.0.0
+Architecture: iphoneos-arm
+Description: Quickly launch apps from the lockscreen
+Maintainer: Cameron Katri <me@cameronkatri.com>
+Author: Cameron Katri <me@cameronkatri.com>
+Section: Tweaks
+Depends: com.opa334.altlist, mobilesubstrate (>= 0.9.5000)
