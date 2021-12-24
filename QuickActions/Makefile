@@ -12,6 +12,7 @@ TWEAK_NAME = QuickActions
 
 QuickActions_FILES = Tweak.x
 QuickActions_CFLAGS = -fobjc-arc
+QuickActions_PRIVATE_FRAMEWORKS = CoverSheet SpringBoardFoundation
 
 include $(THEOS_MAKE_PATH)/tweak.mk
 SUBPROJECTS += QuickActionsPrefs

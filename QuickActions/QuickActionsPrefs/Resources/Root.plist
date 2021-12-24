@@ -7,22 +7,6 @@
 		<dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>
-			<key>label</key>
-			<string>QuickActions</string>
-		</dict>
-		<dict>
-			<key>cell</key>
-			<string>PSSwitchCell</string>
-			<key>defaults</key>
-			<string>com.cameronkatri.quickactions</string>
-			<key>key</key>
-			<string>leftOn</string>
-			<key>label</key>
-			<string>Custom Left Button</string>
-			<key>default</key>
-			<false/>
-			<key>PostNotification</key>
-			<string>com.cameronkatri.quickactions/ReloadPrefs</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -30,11 +14,11 @@
 			<key>defaults</key>
 			<string>com.cameronkatri.quickactions</string>
 			<key>label</key>
-			<string>Left App</string>
+			<string>Left Apps</string>
 			<key>detail</key>
-			<string>ATLApplicationListSelectionController</string>
+			<string>ATLApplicationListMultiSelectionController</string>
 			<key>key</key>
-			<string>leftApp</string>
+			<string>leftButtons</string>
 			<key>cellClass</key>
 			<string>ATLApplicationSelectionCell</string>
 			<key>sections</key>
@@ -56,22 +40,10 @@
 			<true/>
 			<key>includeIdentifiersInSearch</key>
 			<true/>
-			<key>PostNotification</key>
-			<string>com.cameronkatri.quickactions/ReloadPrefs</string>
 		</dict>
 		<dict>
 			<key>cell</key>
-			<string>PSSwitchCell</string>
-			<key>defaults</key>
-			<string>com.cameronkatri.quickactions</string>
-			<key>key</key>
-			<string>rightOn</string>
-			<key>label</key>
-			<string>Custom Right Button</string>
-			<key>default</key>
-			<false/>
-			<key>PostNotification</key>
-			<string>com.cameronkatri.quickactions/ReloadPrefs</string>
+			<string>PSGroupCell</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -79,11 +51,11 @@
 			<key>defaults</key>
 			<string>com.cameronkatri.quickactions</string>
 			<key>label</key>
-			<string>Right App</string>
+			<string>Right Apps</string>
 			<key>detail</key>
-			<string>ATLApplicationListSelectionController</string>
+			<string>ATLApplicationListMultiSelectionController</string>
 			<key>key</key>
-			<string>rightApp</string>
+			<string>rightButtons</string>
 			<key>cellClass</key>
 			<string>ATLApplicationSelectionCell</string>
 			<key>sections</key>
@@ -105,8 +77,12 @@
 			<true/>
 			<key>includeIdentifiersInSearch</key>
 			<true/>
-			<key>PostNotification</key>
-			<string>com.cameronkatri.quickactions/ReloadPrefs</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>Links</string>
 		</dict>
 		<dict>
 			<key>cell</key>
