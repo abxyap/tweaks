@@ -56,7 +56,6 @@ void openApplication(NSString *bundleID)
 	NSArray *leftButtons = (NSArray*)[defaults objectForKey:@"leftButtons"];
 	NSArray *rightButtons = (NSArray*)[defaults objectForKey:@"rightButtons"];
 
-
 	self.leftButtons = [[NSMutableArray alloc] init];
 	self.rightButtons = [[NSMutableArray alloc] init];
 
@@ -162,7 +161,17 @@ void openApplication(NSString *bundleID)
 		self.cameraButton.frame = CGRectMake(bounds.size.width - insets.left - buttonWidth,
 				bounds.size.height - buttonHeight - insets.bottom,
 				buttonWidth, buttonHeight);
-		
+	}
+
+	UIImageSymbolConfiguration *imageConfig = [UIImageSymbolConfiguration configurationWithTextStyle:UIFontTextStyleTitle1];
+	UIImage *image = [UIImage systemImageNamed:@"ellipsis" withConfiguration:imageConfig];
+	if ([self.leftButtons count] > 1) {
+		[self.flashlightButton setImage:image];
+		((UIImageView*)[self.flashlightButton valueForKey:@"_contentView"]).contentMode = UIViewContentModeScaleAspectFit;
+	}
+	if ([self.rightButtons count] > 1) {
+		[self.cameraButton setImage:image];
+		((UIImageView*)[self.cameraButton valueForKey:@"_contentView"]).contentMode = UIViewContentModeScaleAspectFit;
 	}
 
 	for (CSQuickActionsButton *button in [self leftButtons]) {
