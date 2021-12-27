@@ -7,76 +7,94 @@
 		<dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>Left</string>
 		</dict>
 		<dict>
 			<key>cell</key>
 			<string>PSLinkListCell</string>
+			<key>label</key>
+			<string>Left Buttons</string>
+			<key>detail</key>
+			<string>QASAppSelectorController</string>
 			<key>defaults</key>
 			<string>com.cameronkatri.quickactions</string>
-			<key>label</key>
-			<string>Left Apps</string>
-			<key>detail</key>
-			<string>ATLApplicationListMultiSelectionController</string>
 			<key>key</key>
 			<string>leftButtons</string>
-			<key>cellClass</key>
-			<string>ATLApplicationSelectionCell</string>
-			<key>sections</key>
-			<array>
-				<dict>
-					<key>sectionType</key>
-					<string>System</string>
-				</dict>
-				<dict>
-					<key>sectionType</key>
-					<string>User</string>
-				</dict>
-			</array>
-			<key>useSearchBar</key>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSEditTextCell</string>
+			<key>label</key>
+			<string>Offset X</string>
+			<key>key</key>
+			<string>LeftOffsetX</string>
+			<key>defaults</key>
+			<string>com.cameronkatri.quickactions</string>
+			<key>isDecimalPad</key>
 			<true/>
-			<key>hideSearchBarWhileScrolling</key>
-			<false/>
-			<key>showIdentifiersAsSubtitle</key>
+			<key>placeholder</key>
+			<string>0</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSEditTextCell</string>
+			<key>label</key>
+			<string>Offset Y</string>
+			<key>key</key>
+			<string>LeftOffsetY</string>
+			<key>defaults</key>
+			<string>com.cameronkatri.quickactions</string>
+			<key>isDecimalPad</key>
 			<true/>
-			<key>includeIdentifiersInSearch</key>
-			<true/>
+			<key>placeholder</key>
+			<string>0</string>
 		</dict>
 		<dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>Right</string>
 		</dict>
 		<dict>
 			<key>cell</key>
 			<string>PSLinkListCell</string>
+			<key>label</key>
+			<string>Right Buttons</string>
+			<key>detail</key>
+			<string>QASAppSelectorController</string>
 			<key>defaults</key>
 			<string>com.cameronkatri.quickactions</string>
-			<key>label</key>
-			<string>Right Apps</string>
-			<key>detail</key>
-			<string>ATLApplicationListMultiSelectionController</string>
 			<key>key</key>
 			<string>rightButtons</string>
-			<key>cellClass</key>
-			<string>ATLApplicationSelectionCell</string>
-			<key>sections</key>
-			<array>
-				<dict>
-					<key>sectionType</key>
-					<string>System</string>
-				</dict>
-				<dict>
-					<key>sectionType</key>
-					<string>User</string>
-				</dict>
-			</array>
-			<key>useSearchBar</key>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSEditTextCell</string>
+			<key>label</key>
+			<string>Offset X</string>
+			<key>key</key>
+			<string>RightOffsetX</string>
+			<key>defaults</key>
+			<string>com.cameronkatri.quickactions</string>
+			<key>isDecimalPad</key>
 			<true/>
-			<key>hideSearchBarWhileScrolling</key>
-			<false/>
-			<key>showIdentifiersAsSubtitle</key>
+			<key>placeholder</key>
+			<string>0</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSEditTextCell</string>
+			<key>label</key>
+			<string>Offset Y</string>
+			<key>key</key>
+			<string>RightOffsetY</string>
+			<key>defaults</key>
+			<string>com.cameronkatri.quickactions</string>
+			<key>isDecimalPad</key>
 			<true/>
-			<key>includeIdentifiersInSearch</key>
-			<true/>
+			<key>placeholder</key>
+			<string>0</string>
 		</dict>
 		<dict>
 			<key>cell</key>

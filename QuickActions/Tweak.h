@@ -47,18 +47,51 @@
 -(void)setBackgroundEffectViewGroupName:(NSString *)arg1;
 -(id)initWithType:(long long)type;
 -(void)setImage:(UIImage *)arg1;
+-(void)setSelectedImage:(UIImage *)arg1;
 -(void)setSelected:(BOOL)arg;
+-(UIImage *)_imageWithName:(NSString *)arg1;
 -(UIImage *)image;
 -(UIImage *)selectedImage;
 -(void)setEdgeInsets:(UIEdgeInsets)arg;
+-(void)setLatching:(BOOL)arg1;
 
 @property (nonatomic,retain) NSString * bundleID;
+@end
+
+@interface CSAction : NSObject
++(id)actionWithType:(long long)arg1;
+@end
+
+@interface CSQuickActionsViewController : UIViewController
+-(void)_launchCamera;
+-(void)_toggleFlashlight;
+-(void)_resetIdleTimer;
+-(void)sendAction:(id)arg1;
+@end
+
+
+@interface DNDModeAssertionService
++(DNDModeAssertionService *)serviceForClientIdentifier:(NSString *)arg;
+-(void)takeModeAssertionWithDetails:(id)arg1 error:(id)error;
+-(void)invalidateAllActiveModeAssertionsWithError:(id)error;
+@end
+
+@interface DNDModeAssertionDetails
++(DNDModeAssertionDetails *)userRequestedAssertionDetailsWithIdentifier:(NSString *)arg1 modeIdentifier:(NSString *)arg2 lifetime:(id)arg3;
+@end
+
+@interface DNDStateService
++(id)serviceForClientIdentifier:(id)arg1;
+-(id)queryCurrentStateWithError:(id*)arg1;
+-(void)addStateUpdateListener:(id)arg1 withCompletionHandler:(id /* block */)arg2;
 @end
 
 @interface CSQuickActionsView : UIView
 @property (nonatomic,retain) CSQuickActionsButton * flashlightButton;
 @property (nonatomic,retain) CSQuickActionsButton * cameraButton;
 @property (nonatomic,retain) NSObject * legibilitySettings;
+@property (assign,nonatomic) CSQuickActionsViewController * delegate;
+@property (nonatomic,retain) DNDStateService *stateService;
 -(id)_buttonGroupName;
 -(id)initWithFrame:(CGRect)arg1 delegate:(id)arg2;
 -(void)handleButtonTouchEnded:(id)button;
@@ -66,7 +99,9 @@
 -(void)handleButtonPress:(id)button;
 -(void)_addTargetsToButton:(id)arg1 ;
 -(UIEdgeInsets)_buttonOutsets;
+@end
 
+@interface CSQuickActionsView (QuickActions)
 @property (nonatomic,retain) NSMutableArray<CSQuickActionsButton*> * leftButtons;
 @property (nonatomic,retain) NSMutableArray<CSQuickActionsButton*> * rightButtons;
 @property (nonatomic) BOOL leftOpen;
@@ -75,6 +110,10 @@
 @property (nonatomic) BOOL collapseRight;
 -(CGRect)leftFrameForButton:(CSQuickActionsButton*)button;
 -(CGRect)rightFrameForButton:(CSQuickActionsButton*)button;
+-(void)setDoNotDisturb:(BOOL)state;
+-(BOOL)isDNDActive;
+-(void)updateDND:(NSNotification *)notif;
+-(void)stateService:(id)arg1 didRecieveDoNotDisturbStateUpdate:(id)arg2;
 @end
 
 @interface NSUserDefaults (Private)

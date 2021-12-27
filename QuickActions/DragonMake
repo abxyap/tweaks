@@ -1,0 +1,32 @@
+name: QuickActions
+id: com.cameronkatri.quickactions
+depends: mobilesubstrate
+architecture: iphoneos-arm
+version: 1.0.0
+description: Quickly launch apps from the lockscreen
+author: Cameron Katri <me@cameronkatri.com>
+section: Tweaks
+depends: mobilesubstrate, preferenceloader
+icmd: sbreload
+
+QuickActions:
+  type: tweak
+  filter:
+    executables:
+    - SpringBoard
+  files:
+    - Tweak.x
+  frameworks:
+    - CoverSheet
+    - SpringBoardFoundation
+  targetvers: 13.0
+
+QuickActionsPrefs:
+  type: prefs
+  dir: QuickActionsPrefs
+  files:
+    - QASRootListController.m
+    - QASAppSelectorController.m
+  frameworks:
+    - MobileCoreServices
+  targetvers: 13.0
