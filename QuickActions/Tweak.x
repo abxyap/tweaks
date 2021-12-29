@@ -46,7 +46,7 @@ void openApplication(NSString *bundleID)
 %property (nonatomic) BOOL rightOpen;
 %property (nonatomic) BOOL collapseLeft;
 %property (nonatomic) BOOL collapseRight;
-%property (nonatomic,retain) DNDStateService *stateService;
+%property (nonatomic, retain) DNDStateService *stateService;
 
 -(id)initWithFrame:(CGRect)arg1 delegate:(id)arg2
 {
