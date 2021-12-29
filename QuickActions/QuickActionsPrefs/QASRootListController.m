@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+#import "Preferences/PSTableCell.h"
 #import <Foundation/Foundation.h>
 #import "QASRootListController.h"
 #include <spawn.h>
@@ -32,7 +33,7 @@
 -(void)viewDidLoad
 {
 	[super viewDidLoad];
-	UIBarButtonItem *respringButton = [[UIBarButtonItem alloc] initWithTitle:@"Respring"
+	UIBarButtonItem *respringButton = [[UIBarButtonItem alloc] initWithTitle:@"Apply"
 																																							style:UIBarButtonItemStylePlain
 																																						 target:self
 																																						 action:@selector(respring)];

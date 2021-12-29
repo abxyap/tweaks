@@ -27,6 +27,7 @@ QuickActionsPrefs:
   files:
     - QASRootListController.m
     - QASAppSelectorController.m
+    - LSApplicationProxy+AltList.m
   frameworks:
     - MobileCoreServices
   targetvers: 13.0

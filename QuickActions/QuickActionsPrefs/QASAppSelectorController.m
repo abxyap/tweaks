@@ -1,45 +1,9 @@
 #import <Foundation/Foundation.h>
-#include <objc/NSObject.h>
 #import <UIKit/UIKit.h>
 #import <Preferences/PSSpecifier.h>
+
 #import "QASAppSelectorController.h"
-
-@interface LSApplicationRecord
-@property (readonly) NSArray * appTags;
-@property (getter=isLaunchProhibited,readonly) BOOL launchProhibited;
-@end
-
-@interface LSApplicationProxy : NSObject
-@property (getter=isLaunchProhibited, nonatomic, readonly) BOOL launchProhibited;
-@property (nonatomic, readonly) NSArray *appTags;
-@property (nonatomic,readonly) LSApplicationRecord * correspondingApplicationRecord; 
-+ (id)applicationProxyForIdentifier:(id)arg1;
-- (id)localizedNameForContext:(id)arg1;
-- (NSString *)bundleIdentifier;
-- (NSString *)applicationType;
-- (NSURL *)bundleURL;
-@end
-
-@interface LSApplicationProxy (StolenFromAltList)
-- (BOOL)atl_isHidden;
-@end
-
-@interface LSApplicationWorkspace : NSObject
-+(id)defaultWorkspace;
--(NSArray<LSApplicationProxy *> *)allApplications;
-@end
-
-@interface NSMutableArray (Custom)
--(void)sortApps;
-@end
-
-// @interface ListItem : NSObject
-// @property (nonatomic, retain) NSString *name;
-// @property (nonatomic, retain) NSString *bundleID;
-// @property (nonatomic, retain) NSString *type;
-// @property (nonatomic, retain) UIImage *icon;
-// -(ListItem *)initWithName:(NSString *)name bundleID:(NSString *)bundleID type:(NSString *)type icon:(UIImage *)icon;
-// @end
+#import "LSApplicationProxy+AltList.h"
 
 @implementation QASAppSelectorController
 -(void)viewDidLoad
@@ -54,6 +18,8 @@
 	self.disabled = [NSMutableArray new];
 	self.enabled = [NSMutableArray new];
 
+	self.systemDisabled = @[ @"com.apple.camera", @"com.apple.donotdisturb", @"com.apple.flashlight" ];
+
 	NSArray *defaults = [[[NSUserDefaults alloc] initWithSuiteName:self.defaults] arrayForKey:self.key];
 
 	if (defaults == nil) {
@@ -65,56 +31,92 @@
 		[self.enabled addObjectsFromArray:defaults];
 
 	for (LSApplicationProxy *proxy in [[LSApplicationWorkspace defaultWorkspace] allApplications]) {
-		if (![proxy atl_isHidden] && [self.enabled indexOfObject:proxy.bundleIdentifier] == NSNotFound)
-		[self.disabled addObject:proxy.bundleIdentifier];
+		if (![proxy atl_isHidden] && ![[proxy bundleIdentifier] isEqualToString:@"com.apple.camera"]) {
+			[self.disabled addObject:proxy];
+		}
 	}
 
-	if ([self.enabled indexOfObject:@"com.apple.flashlight"] == NSNotFound)
-		[self.disabled addObject:@"com.apple.flashlight"];
+	[self.disabled sortUsingDescriptors:@[[NSSortDescriptor sortDescriptorWithKey:@"atl_fastDisplayName"
+																		ascending:YES
+																		 selector:@selector(localizedCaseInsensitiveCompare:)]]];
 
-	if ([self.enabled indexOfObject:@"com.apple.donotdisturb"] == NSNotFound)
-		[self.disabled addObject:@"com.apple.donotdisturb"];
+	_searchController = [[UISearchController alloc] initWithSearchResultsController:nil];
+	_searchController.searchResultsUpdater = self;
+	_searchController.obscuresBackgroundDuringPresentation = NO;
+	_searchController.searchBar.delegate = self;
 
-	[self.disabled sortApps];
+	self.navigationItem.searchController = _searchController;
+	self.navigationItem.hidesSearchBarWhenScrolling = NO;
+
+	self.definesPresentationContext = YES;
 }
+
+-(void)updateSearchResultsForSearchController:(UISearchController *)searchController {
+	_searchKey = searchController.searchBar.text;
+	[self.tableView reloadData];
+}
+
+-(BOOL)searchBarShouldBeginEditing:(UISearchBar *)searchBar { return YES; }
 
 -(void)viewWillAppear:(BOOL)animated
 {
-	self.tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStyleGrouped];
-	self.tableView.delegate = self;
-	self.tableView.dataSource = self;
-	self.tableView.editing = TRUE;
+	[super viewWillAppear:animated];
 
-	[self.view addSubview:self.tableView];
+	if (self.tableView == nil) {
+		self.tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStyleGrouped];
+		self.tableView.delegate = self;
+		self.tableView.dataSource = self;
+		self.tableView.editing = TRUE;
+
+		[self.view addSubview:self.tableView];
+	}
 }
 
 -(NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
 {
-	if (section == 0)
-		return @"Enabled";
-	else if (section == 1)
-		return @"Disabled";
-	else
-		return @"";
+	switch ((ItemType)section) {
+		case ENABLED:
+			return @"Enabled";
+		case SYSTEM:
+			return @"System";
+		case APPS:
+			return @"Apps";
+	}
 }
 
 -(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-	return 2;
+	return 3;
 }
 
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-	if (section == 0)
-		return self.enabled.count;
-	else
-		return self.disabled.count;
+	switch ((ItemType)section) {
+		case ENABLED:
+			return self.enabled.count;
+		case SYSTEM:
+			return self.systemDisabled.count;
+		case APPS:
+			return self.filteredDisabled.count;
+	}
 }
 
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-	NSString *bundleid = indexPath.section == 0 ? self.enabled[indexPath.row] : self.disabled[indexPath.row];
+	NSObject *item;
 
+	switch ((ItemType)indexPath.section) {
+		case ENABLED:
+			item = self.enabled[indexPath.row];
+			break;
+		case SYSTEM:
+			item = self.systemDisabled[indexPath.row];
+			break;
+		case APPS:
+			item = self.filteredDisabled[indexPath.row];
+			break;
+	}
+	
 	UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"com.cameronkatri.quickactions"];
 
 	if (cell == nil) {
@@ -122,32 +124,45 @@
 
 		cell.selectionStyle = UITableViewCellSelectionStyleNone;
 	}
-	
-	if ([bundleid isEqualToString:@"com.apple.flashlight"]) {
+
+	if ([item isKindOfClass:[NSString class]] && [(NSString*)item isEqualToString:@"com.apple.donotdisturb"]) {
+		cell.textLabel.text = @"Do Not Disturb";
+		cell.detailTextLabel.text = nil;
+
+		NSBundle *doNotDisturbBundle = [NSBundle bundleWithPath:@"/System/Library/PrivateFrameworks/DoNotDisturb.framework/PlugIns/DoNotDisturbIntents.appex"];
+		cell.imageView.image = [[UIImage imageNamed:@"DoNotDisturb"
+										   inBundle:doNotDisturbBundle
+					  compatibleWithTraitCollection:nil] _applicationIconImageForFormat:0
+								 											precomposed:YES
+																				  scale:[UIScreen mainScreen].scale];
+	} else if ([item isKindOfClass:[NSString class]] && [(NSString*)item isEqualToString:@"com.apple.flashlight"]) {
 		cell.textLabel.text = @"Flashlight";
 		cell.detailTextLabel.text = nil;
 		NSBundle *flashlightModule = [NSBundle bundleWithPath:@"/System/Library/ControlCenter/Bundles/FlashlightModule.bundle"];
 		cell.imageView.image = [[UIImage imageNamed:@"SettingsIcon"
-										  inBundle:flashlightModule
-					 compatibleWithTraitCollection:nil] _applicationIconImageForFormat:0 precomposed:YES scale:[UIScreen mainScreen].scale];
-	} else if ([bundleid isEqualToString:@"com.apple.donotdisturb"]) {
-		cell.textLabel.text = @"Do Not Disturb";
-		cell.detailTextLabel.text = nil;
-		NSBundle *doNotDisturbBundle = [NSBundle bundleWithPath:@"/System/Library/PrivateFrameworks/DoNotDisturb.framework/PlugIns/DoNotDisturbIntents.appex"];
-		cell.imageView.image = [[UIImage imageNamed:@"DoNotDisturb"
-										  inBundle:doNotDisturbBundle
-					 compatibleWithTraitCollection:nil] _applicationIconImageForFormat:0 precomposed:YES scale:[UIScreen mainScreen].scale];
+										   inBundle:flashlightModule
+					  compatibleWithTraitCollection:nil] _applicationIconImageForFormat:0
+								 											precomposed:YES
+																				  scale:[UIScreen mainScreen].scale];
 	} else {
-		cell.textLabel.text = [[LSApplicationProxy applicationProxyForIdentifier:bundleid] localizedNameForContext:nil];
-		if (cell.textLabel.text == nil) {
-			cell.textLabel.text = bundleid;
-			cell.detailTextLabel.text = nil;
+		LSApplicationProxy *proxy;
+		if ([item isKindOfClass:[NSString class]]) {
+			proxy = [LSApplicationProxy applicationProxyForIdentifier:(NSString*)item];
 		} else {
-			cell.detailTextLabel.text = bundleid;
+			proxy = (LSApplicationProxy*)item;
 		}
+		cell.textLabel.text = [proxy atl_nameToDisplay];
+		if (cell.textLabel.text == nil) {
+			cell.textLabel.text = [proxy bundleIdentifier];
+			cell.detailTextLabel.text = nil;
+		} else
+			cell.detailTextLabel.text = [proxy bundleIdentifier];
 		cell.detailTextLabel.textColor = [UIColor secondaryLabelColor];
-		cell.imageView.image = [UIImage _applicationIconImageForBundleIdentifier:bundleid format:0 scale:[UIScreen mainScreen].scale];
+		cell.imageView.image = [UIImage _applicationIconImageForBundleIdentifier:[proxy bundleIdentifier]
+														   				  format:0
+																		   scale:[UIScreen mainScreen].scale];
 	}
+	
 
 	cell.showsReorderControl = indexPath.section == 0 ? YES : FALSE;
 
@@ -156,29 +171,32 @@
 
 -(UITableViewCellEditingStyle)tableView:(UITableView *)tableView editingStyleForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-	return indexPath.section == 0 ? UITableViewCellEditingStyleDelete : UITableViewCellEditingStyleInsert;
+	return indexPath.section == ENABLED ? UITableViewCellEditingStyleDelete : UITableViewCellEditingStyleInsert;
 }
 
 -(BOOL)tableView:(UITableView *)tableView canMoveRowAtIndexPath:(NSIndexPath *)indexPath
 {
-	return indexPath.section == 0 ? YES : FALSE;
+	return indexPath.section == ENABLED ? YES : FALSE;
 }
 
 -(void)tableView:(UITableView *)tableView moveRowAtIndexPath:(nonnull NSIndexPath *)sourceIndexPath toIndexPath:(nonnull NSIndexPath *)destinationIndexPath
 {
-	if (sourceIndexPath.section == 0) {
-		if (destinationIndexPath.section == 0)
-			[self.enabled exchangeObjectAtIndex:sourceIndexPath.row withObjectAtIndex:destinationIndexPath.row];
-		else {
-			[self.disabled addObject:self.enabled[sourceIndexPath.row]];
-			[self.enabled removeObjectAtIndex:sourceIndexPath.row];
-		}
-	} else {
-		[self.enabled insertObject:self.disabled[sourceIndexPath.row] atIndex:destinationIndexPath.row];
-		[self.disabled removeObjectAtIndex:sourceIndexPath.row];
+	switch ((ItemType)sourceIndexPath.section) {
+		case ENABLED:
+			if (destinationIndexPath.section == ENABLED) {
+				NSString *item = self.enabled[sourceIndexPath.row];
+				[self.enabled removeObjectAtIndex:sourceIndexPath.row];
+				[self.enabled insertObject:item atIndex:destinationIndexPath.row];
+			}
+			break;
+		case SYSTEM:
+			[self.enabled insertObject:self.systemDisabled[sourceIndexPath.row] atIndex:destinationIndexPath.row];
+			break;
+		case APPS:
+			[self.enabled insertObject:self.filteredDisabled[sourceIndexPath.row].bundleIdentifier atIndex:destinationIndexPath.row];
+			break;
 	}
 
-	[self.disabled sortApps];
 	[tableView reloadData];
 
 	[[[NSUserDefaults alloc] initWithSuiteName:self.defaults] setObject:self.enabled forKey:self.key];
@@ -186,125 +204,52 @@
 
 -(NSIndexPath *)tableView:(UITableView *)tableView targetIndexPathForMoveFromRowAtIndexPath:(NSIndexPath *)sourceIndexPath toProposedIndexPath:(NSIndexPath *)proposedDestinationIndexPath
 {
-	if (sourceIndexPath.section == 0 && proposedDestinationIndexPath.section == 1) {
-		NSUInteger insPoint = [self.disabled
-			  indexOfObject:self.enabled[sourceIndexPath.row]
-			  inSortedRange:NSMakeRange(0, [self.disabled count])
-					options:NSBinarySearchingInsertionIndex
-			usingComparator:^NSComparisonResult(NSString *obj1, NSString *obj2) {
-				if ([obj1 isEqualToString:@"com.apple.flashlight"])
-					return NSOrderedAscending;
-				else if ([obj2 isEqualToString:@"com.apple.flashlight"])
-					return NSOrderedDescending;
-				NSString *obj1Name = [[LSApplicationProxy applicationProxyForIdentifier:obj1] localizedNameForContext:nil];
-				NSString *obj2Name = [[LSApplicationProxy applicationProxyForIdentifier:obj2] localizedNameForContext:nil];
-				return ([obj1Name localizedCaseInsensitiveCompare:obj2Name]);
-			}];
-		return [NSIndexPath indexPathForRow:insPoint inSection:1];
-	}
+	if (sourceIndexPath.section == ENABLED && proposedDestinationIndexPath.section != ENABLED)
+		return [NSIndexPath indexPathForRow:(self.enabled.count - 1) inSection:0];
+
 	return proposedDestinationIndexPath;
 }
 
 -(void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(nonnull NSIndexPath *)indexPath
 {
-	NSString *item = indexPath.section == 0 ? self.enabled[indexPath.row] : self.disabled[indexPath.row];
-	NSIndexPath *insertPath;
+	NSString *item;
+	switch ((ItemType)indexPath.section) {
+		case ENABLED:
+			item = self.enabled[indexPath.row];
+			break;
+		case SYSTEM:
+			item = self.systemDisabled[indexPath.row];
+			break;
+		case APPS:
+			item = self.filteredDisabled[indexPath.row].bundleIdentifier;
+			break;
+	}
+
+	[tableView beginUpdates];
 
 	if (editingStyle == UITableViewCellEditingStyleDelete) {
-		[self.enabled removeObject:item];
-		[self.disabled addObject:item];
-		[self.disabled sortApps];
-
-		insertPath = [NSIndexPath indexPathForRow:[self.disabled indexOfObject:item] inSection:1];
+		[self.enabled removeObjectAtIndex:indexPath.row];
+		[tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
 	} else if (editingStyle == UITableViewCellEditingStyleInsert) {
-		[self.disabled removeObject:item];
-		[self.enabled addObject:item];
-
-		insertPath = [NSIndexPath indexPathForRow:([self.enabled count] - 1) inSection:0];
+		[self.enabled insertObject:item atIndex:self.enabled.count];
+		[tableView insertRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:([self.enabled count] - 1) inSection:0]] withRowAnimation:UITableViewRowAnimationFade];
 	}
-	
-	[tableView beginUpdates];
-	[tableView insertRowsAtIndexPaths:[NSArray arrayWithObject:insertPath] withRowAnimation:UITableViewRowAnimationFade];
-	[tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
+
 	[tableView endUpdates];
 
 	[[[NSUserDefaults alloc] initWithSuiteName:self.defaults] setObject:self.enabled forKey:self.key];
 }
-@end
 
-@implementation NSMutableArray (Custom)
--(void)sortApps {
-	[self sortUsingComparator:^NSComparisonResult(NSString *obj1, NSString *obj2) {
-		if ([obj1 isEqualToString:@"com.apple.flashlight"])
-			return NSOrderedAscending;
-		else if ([obj2 isEqualToString:@"com.apple.flashlight"])
-			return NSOrderedDescending;
-
-		NSString *obj1Name = [[LSApplicationProxy applicationProxyForIdentifier:obj1] localizedNameForContext:nil];
-		NSString *obj2Name = [[LSApplicationProxy applicationProxyForIdentifier:obj2] localizedNameForContext:nil];
-
-		return ([obj1Name localizedCaseInsensitiveCompare:obj2Name]);
-	}];
-}
-@end
-
-@implementation LSApplicationProxy (StolenFromAltList)
-
-BOOL tagArrayContainsTag(NSArray* tagArr, NSString* tag)
-{
-	if(!tagArr || !tag) return NO;
-
-	__block BOOL found = NO;
-
-	[tagArr enumerateObjectsUsingBlock:^(NSString* tagToCheck, NSUInteger idx, BOOL* stop)
-	{
-		if(![tagToCheck isKindOfClass:[NSString class]])
-		{
-			return;
+-(NSArray<LSApplicationProxy *> *)filteredDisabled {
+	if ([_searchKey length] == 0) {
+		return self.disabled;
+	} else {
+		NSMutableArray<LSApplicationProxy *> *filteredArray = [NSMutableArray new];
+		for (LSApplicationProxy *proxy in self.disabled) {
+			if ([proxy.bundleIdentifier rangeOfString:_searchKey options:NSCaseInsensitiveSearch].location != NSNotFound || [proxy.atl_fastDisplayName rangeOfString:_searchKey options:NSCaseInsensitiveSearch range:NSMakeRange(0, [proxy.atl_fastDisplayName length]) locale:[NSLocale currentLocale]].location != NSNotFound)
+				[filteredArray addObject:proxy];
 		}
-
-		if([tagToCheck rangeOfString:tag options:0].location != NSNotFound)
-		{
-			found = YES;
-			*stop = YES;
-		}
-	}];
-
-	return found;
-}
-
-- (BOOL)atl_isHidden
-{
-	NSArray* appTags;
-	NSArray* recordAppTags;
-	NSArray* sbAppTags;
-
-	BOOL launchProhibited = NO;
-
-	if([self respondsToSelector:@selector(correspondingApplicationRecord)])
-	{
-		// On iOS 14, self.appTags is always empty but the application record still has the correct ones
-		LSApplicationRecord* record = [self correspondingApplicationRecord];
-		recordAppTags = record.appTags;
-		launchProhibited = record.launchProhibited;
+		return filteredArray;
 	}
-	if([self respondsToSelector:@selector(appTags)])
-	{
-		appTags = self.appTags;
-	}
-	if(!launchProhibited && [self respondsToSelector:@selector(isLaunchProhibited)])
-	{
-		launchProhibited = self.launchProhibited;
-	}
-
-	NSURL* bundleURL = self.bundleURL;
-	if(bundleURL && [bundleURL checkResourceIsReachableAndReturnError:nil])
-	{
-		NSBundle* bundle = [NSBundle bundleWithURL:bundleURL];
-		sbAppTags = [bundle objectForInfoDictionaryKey:@"SBAppTags"];
-	}
-
-	BOOL isWebApplication = ([self.bundleIdentifier rangeOfString:@"com.apple.webapp" options:NSCaseInsensitiveSearch].location != NSNotFound);
-	return tagArrayContainsTag(appTags, @"hidden") || tagArrayContainsTag(recordAppTags, @"hidden") || tagArrayContainsTag(sbAppTags, @"hidden") || isWebApplication || launchProhibited;
 }
 @end
