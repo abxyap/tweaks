@@ -14,8 +14,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#import "Preferences/PSTableCell.h"
 #import <Foundation/Foundation.h>
+#import <Preferences/PSSpecifier.h>
 #import "QASRootListController.h"
 #include <spawn.h>
 
@@ -48,6 +48,9 @@
 
 -(void)respring
 {
+	for (PSSpecifier *specifier in [self specifiers]) {
+		[self setPreferenceValue:[specifier propertyForKey:PSValueKey] specifier:specifier];
+	}
 	pid_t pid;
 	const char *args[] = {"sbreload", NULL, NULL, NULL};
 	posix_spawn(&pid, "usr/bin/sbreload", NULL, NULL, (char *const *)args, NULL);
