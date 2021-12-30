@@ -17,6 +17,7 @@ typedef enum {
 UISearchResultsUpdating, UISearchBarDelegate> {
     UISearchController *_searchController;
     NSString *_searchKey;
+    UISelectionFeedbackGenerator *_feedback;
 }
 @property (nonatomic) UITableView *tableView;
 @property (nonatomic) NSMutableArray<NSString *> *enabled;

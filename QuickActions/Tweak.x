@@ -110,12 +110,30 @@ void openApplication(NSString *bundleID)
 		}
 	}
 
-	// [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateDND:) name:@"SBQuietModeStatusChangedNotification" object:nil];
-	// [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateDND:) name:@"QuickActionsUpdateDND" object:nil];
 	self.stateService = (DNDStateService *)[objc_getClass("DNDStateService") serviceForClientIdentifier:@"com.apple.donotdisturb.control-center.module"];
 	[self.stateService addStateUpdateListener:self withCompletionHandler:nil];
 
 	return o;
+}
+
+-(void)refreshFlashlightAvailability
+{
+	%orig;
+
+	if (self.leftOpen) {
+		self.leftOpen = !self.leftOpen;
+		for (CSQuickActionsButton *button in [self leftButtons]) {
+			button.frame = [self leftFrameForButton:button];
+			[button setHidden:!self.leftOpen];
+		}
+	}
+	if (self.rightOpen) {
+		self.rightOpen = !self.rightOpen;
+		for (CSQuickActionsButton *button in [self rightButtons]) {
+			button.frame = [self rightFrameForButton:button];
+			[button setHidden:!self.rightOpen];
+		}
+	}
 }
 
 %new
@@ -161,6 +179,11 @@ void openApplication(NSString *bundleID)
 	if (SBFEffectiveHomeButtonType() != 2) {
 		CGRect bounds = [[UIScreen mainScreen] _referenceBounds];
 
+		// Detect if we are on an iPhone SE and adjust the insets
+		// accordingly to not overlap with the text
+		if ([[UIScreen mainScreen] nativeBounds].size.height == 1136)
+			insets.bottom += 10;
+
 		CGFloat buttonWidth = 50 + insets.right + insets.left;
 		CGFloat buttonHeight = 50 + insets.top + insets.bottom;
 
@@ -203,7 +226,7 @@ void openApplication(NSString *bundleID)
 	for (CSQuickActionsButton *button in [self leftButtons]) {
 		[button setEdgeInsets:insets];
 		button.frame = [self leftFrameForButton:button];
-		[button setHidden:!self.rightOpen];
+		[button setHidden:!self.leftOpen];
 	}
 	for (CSQuickActionsButton *button in [self rightButtons]) {
 		[button setEdgeInsets:insets];
@@ -409,15 +432,5 @@ void openApplication(NSString *bundleID)
 }
 
 %end
-
-// %hook DNDNotificationsService
-
-// -(void)stateService:(id)arg1 didReceiveDoNotDisturbStateUpdate:(id)arg2{
-// 	%orig; 
- 
-// 	[[NSNotificationCenter defaultCenter] postNotificationName:@"QuickActionsUpdateDND" object:nil];
-// } 
- 
-// %end
 
 // vim: filetype=logos

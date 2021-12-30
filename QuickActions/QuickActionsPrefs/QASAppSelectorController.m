@@ -1,6 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 #import <Preferences/PSSpecifier.h>
+#import <AudioToolbox/AudioToolbox.h>
 
 #import "QASAppSelectorController.h"
 #import "LSApplicationProxy+AltList.h"
@@ -40,7 +41,8 @@
 																		ascending:YES
 																		 selector:@selector(localizedCaseInsensitiveCompare:)]]];
 
-	_searchController = [[UISearchController alloc] initWithSearchResultsController:nil];
+	if (_searchController == nil)
+		_searchController = [[UISearchController alloc] initWithSearchResultsController:nil];
 	_searchController.searchResultsUpdater = self;
 	_searchController.obscuresBackgroundDuringPresentation = NO;
 	_searchController.searchBar.delegate = self;
@@ -49,6 +51,11 @@
 	self.navigationItem.hidesSearchBarWhenScrolling = NO;
 
 	self.definesPresentationContext = YES;
+
+
+	if (_feedback == nil)
+		_feedback = [[UISelectionFeedbackGenerator alloc] init];
+	[_feedback prepare];
 }
 
 -(void)updateSearchResultsForSearchController:(UISearchController *)searchController {
@@ -233,6 +240,17 @@
 	} else if (editingStyle == UITableViewCellEditingStyleInsert) {
 		[self.enabled insertObject:item atIndex:self.enabled.count];
 		[tableView insertRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:([self.enabled count] - 1) inSection:0]] withRowAnimation:UITableViewRowAnimationFade];
+
+		switch ([(NSNumber *)[[UIDevice currentDevice] valueForKey:@"_feedbackSupportLevel"] intValue]) {
+			case 2:
+				[_feedback selectionChanged];
+				break;
+			case 1:
+				AudioServicesPlayAlertSound(kSystemSoundID_Vibrate);
+				break;
+			default:
+				break;
+		}
 	}
 
 	[tableView endUpdates];
