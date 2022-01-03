@@ -4,7 +4,7 @@ depends: mobilesubstrate
 architecture: iphoneos-arm
 version: 1.0.0
 description: Quickly launch apps from the lockscreen
-author: Cameron Katri <me+support@cameronkatri.com>
+author: Cameron Katri <me+quickactions@cameronkatri.com>
 section: Tweaks
 depends: mobilesubstrate, preferenceloader
 icmd: sbreload
