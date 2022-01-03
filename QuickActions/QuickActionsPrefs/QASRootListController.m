@@ -30,17 +30,6 @@
 	return _specifiers;
 }
 
--(void)viewDidLoad
-{
-	[super viewDidLoad];
-	UIBarButtonItem *respringButton = [[UIBarButtonItem alloc] initWithTitle:@"Apply"
-																																							style:UIBarButtonItemStylePlain
-																																						 target:self
-																																						 action:@selector(respring)];
-	respringButton.tintColor = [UIColor systemRedColor];
-	[self.navigationItem setRightBarButtonItem:respringButton];
-}
-
 -(void)openSource
 {
 	[[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"https://git.cameronkatri.com/tweaks/tree/QuickActions"] options:@{} completionHandler:nil];
@@ -48,9 +37,6 @@
 
 -(void)respring
 {
-	for (PSSpecifier *specifier in [self specifiers]) {
-		[self setPreferenceValue:[specifier propertyForKey:PSValueKey] specifier:specifier];
-	}
 	pid_t pid;
 	const char *args[] = {"sbreload", NULL, NULL, NULL};
 	posix_spawn(&pid, "usr/bin/sbreload", NULL, NULL, (char *const *)args, NULL);
