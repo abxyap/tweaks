@@ -120,27 +120,30 @@ void openApplication(NSString *bundleID)
 {
 	%orig;
 
-	if (self.leftOpen) {
-		self.leftOpen = !self.leftOpen;
-		for (CSQuickActionsButton *button in [self leftButtons]) {
-			button.frame = [self leftFrameForButton:button];
-			[button setHidden:!self.leftOpen];
-		}
-	}
-	if (self.rightOpen) {
-		self.rightOpen = !self.rightOpen;
-		for (CSQuickActionsButton *button in [self rightButtons]) {
-			button.frame = [self rightFrameForButton:button];
-			[button setHidden:!self.rightOpen];
-		}
-	}
+	[UIView animateWithDuration:0.25
+						  delay:0
+						options:UIViewAnimationOptionCurveEaseOut
+					 animations:^(void){
+					 	for (CSQuickActionsButton *button in [self leftButtons])
+					 		button.frame = [self leftFrameForButton:button open:NO];
+						self.leftOpen = NO;
+					 	for (CSQuickActionsButton *button in [self rightButtons])
+					 		button.frame = [self rightFrameForButton:button open:NO];
+						self.rightOpen = NO;
+					 }
+					 completion:^(BOOL finished) {
+						for (CSQuickActionsButton *button in [self leftButtons])
+							[button setHidden:YES];
+						for (CSQuickActionsButton *button in [self rightButtons])
+							[button setHidden:YES];
+                     }];
 }
 
 %new
--(CGRect)rightFrameForButton:(CSQuickActionsButton*)button
+-(CGRect)rightFrameForButton:(CSQuickActionsButton*)button open:(BOOL)open
 {
 	CGRect cameraFrame = [[self cameraButton] frame];
-	if (self.rightOpen) {
+	if (open) {
 		return CGRectMake(cameraFrame.origin.x,
 			cameraFrame.origin.y - ((cameraFrame.size.height * 3/4) * (button.type - 1)),
 			cameraFrame.size.width, cameraFrame.size.height);
@@ -150,10 +153,10 @@ void openApplication(NSString *bundleID)
 }
 
 %new
--(CGRect)leftFrameForButton:(CSQuickActionsButton*)button
+-(CGRect)leftFrameForButton:(CSQuickActionsButton*)button open:(BOOL)open
 {
 	CGRect flashlightFrame = [[self flashlightButton] frame];
-	if (self.leftOpen) {
+	if (open) {
 		return CGRectMake(flashlightFrame.origin.x,
 			flashlightFrame.origin.y - ((flashlightFrame.size.height * 3/4) * (button.type - 1)),
 			flashlightFrame.size.width, flashlightFrame.size.height);
@@ -225,13 +228,13 @@ void openApplication(NSString *bundleID)
 
 	for (CSQuickActionsButton *button in [self leftButtons]) {
 		[button setEdgeInsets:insets];
-		button.frame = [self leftFrameForButton:button];
-		[button setHidden:!self.leftOpen];
+		button.frame = [self leftFrameForButton:button open:NO];
+		[button setHidden:YES];
 	}
 	for (CSQuickActionsButton *button in [self rightButtons]) {
 		[button setEdgeInsets:insets];
-		button.frame = [self rightFrameForButton:button];
-		[button setHidden:!self.rightOpen];
+		button.frame = [self rightFrameForButton:button open:NO];
+		[button setHidden:YES];
 	}
 
 	[self updateDND:nil];
@@ -248,7 +251,7 @@ void openApplication(NSString *bundleID)
 												options:UIViewAnimationOptionCurveEaseOut
 										 animations:^(void){
 																for (CSQuickActionsButton *button in [self rightButtons]) {
-																	button.frame = [self rightFrameForButton:button];
+																	button.frame = [self rightFrameForButton:button open:self.rightOpen];
 																	if (self.rightOpen)
 																		[button setHidden:0];
 																}
@@ -264,7 +267,7 @@ void openApplication(NSString *bundleID)
 												options:UIViewAnimationOptionCurveEaseOut
 										 animations:^(void) {
 																for (CSQuickActionsButton *button in [self leftButtons]) {
-																	button.frame = [self leftFrameForButton:button];
+																	button.frame = [self leftFrameForButton:button open:self.leftOpen];
 																	if (self.leftOpen)
 																		[button setHidden:0];
 																}
@@ -286,7 +289,7 @@ void openApplication(NSString *bundleID)
 		return;
 	}
 
-	/* This will make the CC module be correct */
+	/* This will make the flashlight module be correct */
 	[self.delegate _resetIdleTimer];
 	[self.delegate sendAction:[CSAction actionWithType:5]];
 

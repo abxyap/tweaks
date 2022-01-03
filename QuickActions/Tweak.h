@@ -108,8 +108,8 @@
 @property (nonatomic) BOOL rightOpen;
 @property (nonatomic) BOOL collapseLeft;
 @property (nonatomic) BOOL collapseRight;
--(CGRect)leftFrameForButton:(CSQuickActionsButton*)button;
--(CGRect)rightFrameForButton:(CSQuickActionsButton*)button;
+-(CGRect)leftFrameForButton:(CSQuickActionsButton*)button open:(BOOL)open;
+-(CGRect)rightFrameForButton:(CSQuickActionsButton*)button open:(BOOL)open;
 -(void)setDoNotDisturb:(BOOL)state;
 -(BOOL)isDNDActive;
 -(void)updateDND:(NSNotification *)notif;
