@@ -11,4 +11,4 @@ Start using your phone quicker by launching your favorite apps directly from the
 QuickActions has support for all iPhones running iOS 13 or higher.
 
 ## Free Software
-QuickActions is open source available under the AGPLv3 license [located at this repo](https://git.cameronkatri.com/tweaks/tree/QuickActions).
+QuickActions is open source available under the BSD-2-Clause license [located at this repo](https://git.cameronkatri.com/tweaks/tree/QuickActions).
