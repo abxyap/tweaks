@@ -18,6 +18,7 @@
 #import <Preferences/PSSpecifier.h>
 #import "QASRootListController.h"
 #include <spawn.h>
+#include <rootless.h>
 
 @implementation QASRootListController
 
@@ -39,7 +40,7 @@
 {
 	pid_t pid;
 	const char *args[] = {"sbreload", NULL, NULL, NULL};
-	posix_spawn(&pid, "usr/bin/sbreload", NULL, NULL, (char *const *)args, NULL);
+	posix_spawn(&pid, ROOT_PATH("/usr/bin/sbreload"), NULL, NULL, (char *const *)args, NULL);
 }
 
 @end
