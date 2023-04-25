@@ -27,12 +27,8 @@
 +(id)optionsWithDictionary:(id)arg1;
 @end
 
-@interface FBSystemServiceOpenApplicationRequest : NSObject
-@property (assign,getter=isTrusted,nonatomic) BOOL trusted;
-@property (nonatomic,copy) NSString * bundleIdentifier;
-@property (nonatomic,copy) FBSOpenApplicationOptions * options;
-@property (nonatomic,retain) FBProcess * clientProcess;
-+(id)request;
+@interface FBSOpenApplicationService : NSObject
+-(void)openApplication:(NSString *)arg1 withOptions:(FBSOpenApplicationOptions *)arg2 completion:(id)arg3;
 @end
 
 @interface CSQuickActionsButton : UIView {

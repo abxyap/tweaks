@@ -1,6 +1,6 @@
 Package: com.cameronkatri.quickactions
 Name: QuickActions
-Version: 1.0.0
+Version: 1.0.0-1
 Architecture: iphoneos-arm
 Description: Quickly launch apps from the lockscreen
 Maintainer: Cameron Katri <me+quickactions@cameronkatri.com>

@@ -22,20 +22,16 @@
 
 void openApplication(NSString *bundleID)
 {
-	FBSOpenApplicationOptions* opts = [%c(FBSOpenApplicationOptions) optionsWithDictionary:@{
+	FBSOpenApplicationOptions *opts = [%c(FBSOpenApplicationOptions) optionsWithDictionary:@{
 		@"__LaunchOrigin" : @"BulletinDestinationCoverSheet",
 		@"__PromptUnlockDevice" : @YES,
 		@"__UnlockDevice" : @YES,
 		@"__LaunchImage" : @"",
 		@"__Actions" : @[]
 	}];
-	FBSystemServiceOpenApplicationRequest* request = [%c(FBSystemServiceOpenApplicationRequest) request];
-	request.options = opts;
-	request.bundleIdentifier = bundleID;
-	request.trusted = YES;
-	request.clientProcess = [[%c(FBProcessManager) sharedInstance] systemApplicationProcess];
 
-	[[%c(SBMainWorkspace) sharedInstance] systemService:[%c(FBSystemService) sharedInstance] handleOpenApplicationRequest:request withCompletion:^{}];
+	FBSOpenApplicationService *openService = [[%c(FBSOpenApplicationService) alloc] init];
+	[openService openApplication:bundleID withOptions:opts completion:nil];
 }
 
 %hook CSQuickActionsView
